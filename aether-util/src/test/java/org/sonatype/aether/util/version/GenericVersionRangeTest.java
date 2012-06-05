@@ -15,6 +15,7 @@ package org.sonatype.aether.util.version;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.junit.BeforeClass;
 import org.sonatype.aether.version.InvalidVersionSpecificationException;
 import org.sonatype.aether.version.Version;
 import org.sonatype.aether.version.VersionRange;
@@ -40,7 +41,7 @@ public class GenericVersionRangeTest
             error.initCause( e );
             throw error;
         }
-    }
+    }	
 
     private void parseInvalid( String range )
     {
@@ -64,6 +65,13 @@ public class GenericVersionRangeTest
     {
         assertFalse( range + " should not contain " + version, range.containsVersion( newVersion( version ) ) );
     }
+
+	/* */
+	@BeforeClass
+	public static final void setSystemProp() {
+		System.setProperty("snapshots", "true");
+	}
+	/* */
 
     @Test
     public void testLowerBoundInclusiveUpperBoundInclusive()
@@ -142,5 +150,18 @@ public class GenericVersionRangeTest
         parseInvalid( "(1,2,3)" );
         parseInvalid( "[1,2,3)" );
     }
+	
+		/* */
+	@Test
+	public void testSnapshotExclude() {
+		System.setProperty("snapshots", "false");
+		VersionRange range = parseValid("[1,2]");
+		assertContains(range, "1");
+		assertNotContains(range, "1.1-SNAPSHOT");
+		assertContains(range, "2");
+		assertEquals(range, parseValid(range.toString()));
+		setSystemProp();
+	}
+	/* */
 
 }

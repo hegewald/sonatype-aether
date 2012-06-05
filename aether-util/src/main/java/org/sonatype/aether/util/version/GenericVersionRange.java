@@ -33,6 +33,10 @@ final class GenericVersionRange
     private final Version upperBound;
 
     private final boolean upperBoundInclusive;
+	
+	/* */
+    private Boolean snapshotsAllowed;
+    /* */
 
     /**
      * Creates a version range from the specified range specification.
@@ -43,7 +47,11 @@ final class GenericVersionRange
     public GenericVersionRange( String range )
         throws InvalidVersionSpecificationException
     {
-        String process = range;
+        /* */
+    	snapshotsAllowed = Boolean.valueOf(System.getProperty("snapshots"));
+    	/* */
+		
+		String process = range;
 
         if ( range.startsWith( "[" ) )
         {
@@ -143,8 +151,14 @@ final class GenericVersionRange
     }
 
     public boolean containsVersion( Version version )
-    {
-        if ( lowerBound != null )
+    {        
+		/* */
+        if(!snapshotsAllowed && version.toString().contains("SNAPSHOT")) {
+        	return false;
+        }
+        /* */
+		
+		if ( lowerBound != null )
         {
             int comparison = lowerBound.compareTo( version );
 
